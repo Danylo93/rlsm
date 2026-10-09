@@ -14,6 +14,7 @@
  *
  * Uso:  npm run filme:profundidade   (uma vez, gera os mapas)
  *       npm run filme:parallax       (todos)   |   npm run filme:parallax hero cta
+ *       npm run filme:parallax -- --celular     (só os quadros retrato, m/)
  * Saída: public/filme/<nome>/q-001.webp … (+ m/ retrato) e entradas no manifest.
  * Um clipe filmado de verdade em filme/clipes/<nome>.mp4 tem prioridade: esse
  * plano é pulado aqui e fica com o vídeo real (npm run filme:quadros).
@@ -154,6 +155,26 @@ const MOVIMENTOS = {
         f: 0.4,
         luz: 0.2,
     },
+}
+
+/*
+ * No celular a foto já é um recorte retrato fechado e a tela em pé corta mais
+ * ainda: o mesmo zoom do desktop vira um close desfocado. Lá a câmera é contida.
+ */
+function paraCelular(cfg) {
+    const escala = (chaves, fn) =>
+        chaves === undefined ? undefined : typeof chaves === 'number' ? fn(chaves) : chaves.map(([s, v]) => [s, fn(v)])
+    const zoom = (z) => (z <= 1 ? z : Math.max(1.03, 1 + (z - 1) * 0.45))
+    const menos = (v) => v * 0.6
+    return {
+        ...cfg,
+        z: escala(cfg.z, zoom),
+        m: escala(cfg.m, menos),
+        tx: escala(cfg.tx, menos),
+        ty: escala(cfg.ty, menos),
+        px: escala(cfg.px, menos),
+        py: escala(cfg.py, menos),
+    }
 }
 
 /* ---------------- interpolação ---------------- */
@@ -376,7 +397,8 @@ async function gerar(nome, cfg, sufixo, larguraSaida, pasta) {
     const cena = await objetos(mapa, w, h, rigido)
     if (sufixo === '') console.log(`  ${nome}: ${cena.objetos} objetos rígidos`)
 
-    rmSync(pasta, { recursive: true, force: true })
+    // a pasta desktop guarda m/ dentro: só a própria pasta de saída é limpa aqui
+    for (const f of existsSync(pasta) ? readdirSync(pasta) : []) if (f.startsWith('q-')) rmSync(join(pasta, f))
     mkdirSync(pasta, { recursive: true })
     for (let q = 0; q < cfg.quadros; q++) {
         const s = cfg.quadros === 1 ? 0 : q / (cfg.quadros - 1)
@@ -389,7 +411,8 @@ async function gerar(nome, cfg, sufixo, larguraSaida, pasta) {
 
 /* ---------------- principal ---------------- */
 
-const pedidos = process.argv.slice(2)
+const soCelular = process.argv.includes('--celular')
+const pedidos = process.argv.slice(2).filter((a) => !a.startsWith('--'))
 const reais = existsSync(dirClipes) ? readdirSync(dirClipes).map((f) => f.replace(/\.\w+$/, '')) : []
 const arqManifesto = join(dirSaida, 'manifest.json')
 const manifesto = existsSync(arqManifesto) ? JSON.parse(readFileSync(arqManifesto, 'utf8')) : { cenas: [], clipes: [] }
@@ -403,9 +426,13 @@ for (const [nome, cfg] of Object.entries(MOVIMENTOS)) {
     }
     const t0 = Date.now()
     const pasta = join(dirSaida, nome)
-    await gerar(nome, cfg, '', LARGURA, pasta)
     const mobile = cfg.mobile !== false && existsSync(join(dirCenas, `${nome}-m.webp`))
-    if (mobile) await gerar(nome, cfg, '-m', LARGURA_MOBILE, join(pasta, 'm'))
+    if (soCelular && !mobile) continue
+    if (!soCelular) {
+        rmSync(pasta, { recursive: true, force: true })
+        await gerar(nome, cfg, '', LARGURA, pasta)
+    }
+    if (mobile) await gerar(nome, paraCelular(cfg), '-m', LARGURA_MOBILE, join(pasta, 'm'))
 
     manifesto.clipes = manifesto.clipes.filter((c) => c.clipe !== nome)
     manifesto.clipes.push({
