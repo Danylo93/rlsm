@@ -14,7 +14,7 @@ import { site } from '@/data/site'
 const anton = localFont({ src: '../assets/fonts/Anton-Regular.ttf', weight: '400', variable: '--font-anton', display: 'swap' })
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
 
-const titulo = 'Radicais Livres São Miguel | Uma geração que se levanta'
+const titulo = 'RL São Miguel | Nós ainda não vivemos Tudo'
 const descricao = 'Radicais Livres São Miguel. Destinados ao Avivamento'
 
 export const metadata: Metadata = {

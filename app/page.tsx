@@ -48,7 +48,7 @@ export default function Inicio() {
                 <Marquee
                     variante="acido"
                     inclinacao={-2}
-                    itens={['Radicais Livres', 'São Miguel', 'Uma geração que se levanta', 'Jesus']}
+                    itens={['Radicais Livres', 'São Miguel', 'Nós ainda não vivemos Tudo', 'Jesus']}
                     className="-mb-4"
                 />
 
