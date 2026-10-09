@@ -55,6 +55,11 @@ export interface Plano {
     ate?: number
     camera?: Partial<Camera>
     cameraMobile?: Partial<Camera>
+    /**
+     * clipe deste plano (filme/clipes/<nome>.mp4), tocado pela rolagem no lugar
+     * da foto. Padrão: o nome da foto (hero.webp → hero.mp4).
+     */
+    video?: string
     /** camada de primeiro plano (pessoas recortadas) desenhada por cima do texto */
     frente?: { src: string; srcMobile?: string }
     /** legenda do plano (montagens) */

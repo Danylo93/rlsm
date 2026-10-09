@@ -55,7 +55,9 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
                     só existem com JS, então sem JS tudo aparece normalmente */}
                 <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
             </head>
-            <body>
+            {/* suppressHydrationWarning: extensões do navegador injetam atributos no <body>
+                (ex.: __processed_…__) antes do React hidratar — não é bug do site */}
+            <body suppressHydrationWarning>
                 <a
                     href="#numeros"
                     className="wide sr-only z-[90] bg-acido px-4 py-3 text-[12px] text-preto focus:not-sr-only focus:fixed focus:left-4 focus:top-4"

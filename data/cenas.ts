@@ -6,8 +6,9 @@
  * componentes de components/sections.
  *
  * Trocar fotos: substitua em fotos-originais/ e rode `npm run fotos`.
- * Vídeo de verdade: coloque clipes em filme/clipes/cena-01.mp4 (número = `numero`)
- * e rode `npm run filme:quadros` — a cena passa a tocar o vídeo pela rolagem.
+ * Movimento: cada foto vira um clipe 2.5D (scripts/filme-parallax.mjs — a câmera
+ * de cada plano está escrita lá, junto com a frase da cena). Vídeo filmado de
+ * verdade em filme/clipes/<nome da foto>.mp4 + `npm run filme:quadros` substitui.
  */
 
 import type { CenaFilme } from '@/components/cinematic/motor'
