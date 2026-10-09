@@ -128,7 +128,7 @@ export function BarraProgresso() {
     }, [])
     return (
         <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-[70] h-[2px]">
-            <div ref={ref} className="h-full origin-left bg-acido" style={{ transform: 'scaleX(0)' }} />
+            <div ref={ref} className="faixa-espectro h-full origin-left" style={{ transform: 'scaleX(0)' }} />
         </div>
     )
 }

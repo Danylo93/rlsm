@@ -258,6 +258,22 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
                 dw = largura
                 dh = largura / ir
             }
+            if (cam.enquadramento === 'conter') {
+                // Fundo suave preenche as laterais; a foto nítida preserva os rostos.
+                c.save()
+                c.globalAlpha = alfa
+                c.fillStyle = PRETO
+                c.fillRect(0, 0, largura, altura)
+                if (suportaFiltro && !leve) {
+                    c.filter = 'blur(24px)'
+                    c.globalAlpha = alfa * 0.3
+                    c.drawImage(img, (largura - dw * 1.1) / 2, (altura - dh * 1.1) / 2, dw * 1.1, dh * 1.1)
+                }
+                c.restore()
+                const escala = Math.min(largura / img.naturalWidth, altura / img.naturalHeight) * 0.92
+                dw = img.naturalWidth * escala
+                dh = img.naturalHeight * escala
+            }
             dw *= zoom
             dh *= zoom
             const ox = (px * (dw - largura)) / 2
@@ -445,7 +461,7 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
             }
             // fio ácido do corte editorial
             ctx.globalAlpha = 0.85 * intensidade
-            ctx.fillStyle = '#d7ff1f'
+            ctx.fillStyle = '#d8ff00'
             const yl = aleatorio(semente + 77) * H
             ctx.fillRect(aleatorio(semente + 5) * W * 0.4, yl, W * (0.2 + aleatorio(semente + 6) * 0.5), Math.max(2, 2 * dpr))
             ctx.restore()

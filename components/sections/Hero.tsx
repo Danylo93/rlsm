@@ -59,31 +59,31 @@ export default function Hero() {
 
     return (
         <div className={filme ? 'absolute inset-0 z-30' : 'relative'}>
-            <div className="flex h-full min-h-[100svh] flex-col items-center justify-center px-4 pt-[var(--cabecalho)] text-center">
+            <div className="hero-conteudo flex h-full min-h-[100svh] flex-col items-center justify-center px-4 text-center">
                 <div ref={blocoRef} data-anim className="flex origin-center flex-col items-center">
-                    <h1 className="display sombra-filme flex flex-col items-center" aria-label="Radicais Livres São Miguel">
-                        <span ref={l1Ref} className="mascara" aria-hidden>
-                            <span data-intro className="text-[min(23vw,30dvh)] leading-[0.8] baixo:text-[24dvh] md:text-[min(19vw,31dvh)]">
+                    <h1 className="hero-titulo display poster-titulo flex flex-col items-center" aria-label="Radicais Livres São Miguel">
+                        <span ref={l1Ref} className="hero-linha mascara" aria-hidden>
+                            <span data-intro className="hero-palavra">
                                 Radicais
                             </span>
                         </span>
-                        <span ref={l2Ref} className="mascara" aria-hidden>
-                            <span data-intro className="text-[min(23vw,30dvh)] leading-[0.8] baixo:text-[24dvh] md:text-[min(19vw,31dvh)]">
+                        <span ref={l2Ref} className="hero-linha mascara" aria-hidden>
+                            <span data-intro className="hero-palavra">
                                 Livres
                             </span>
                         </span>
-                        <span ref={l3Ref} className="mascara mt-[1.6dvh] tracking-[0.42em]" aria-hidden>
-                            <span data-intro className="wide pl-[0.42em] text-[clamp(15px,2.3vw,32px)] text-acido">
+                        <span ref={l3Ref} className="hero-local mascara" aria-hidden>
+                            <span data-intro className="wide text-acido">
                                 São Miguel
                             </span>
                         </span>
                     </h1>
-                    <div ref={legendaRef} className="ui-escala mt-[3.2dvh] flex flex-col items-center gap-3 baixo:gap-1.5">
+                    <div ref={legendaRef} className="hero-legenda ui-escala flex flex-col items-center gap-3 baixo:gap-1.5">
                         <p data-intro-fade className="mono text-[10px] text-osso/70 sm:text-[11px]">
                             Videira São Miguel
                         </p>
                         <p data-intro-fade className="wide text-[12px] tracking-[0.18em] sm:text-[14px]">
-                            Uma geração que se levanta.
+                            Nós Ainda não vivemos Tudo.
                         </p>
                     </div>
                 </div>
@@ -95,7 +95,7 @@ export default function Hero() {
                     <div
                         ref={indicadorRef}
                         aria-hidden
-                        className="ui-escala pointer-events-none absolute bottom-14 left-1/2 flex -translate-x-1/2 flex-col items-center gap-3 baixo:hidden sm:bottom-16"
+                        className="hero-indicador ui-escala pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 flex-col items-center gap-3 baixo:hidden sm:bottom-4"
                     >
                         <span data-intro-fade className="mono text-[10px] text-osso/80">
                             Role para viver ↓

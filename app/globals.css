@@ -1,25 +1,24 @@
 @import "tailwindcss";
 
-/* ============================================================
-   RADICAIS LIVRES SÃO MIGUEL — identidade
-   Preto e branco na maior parte. Ácido (herdado da RLCON 27) para
-   destaques; Brasa é a cor própria do RL São Miguel (marcas, REC,
-   cortes, sombras de botão). Usar com parcimônia.
-   ============================================================ */
+/* Identidade RLCON: Anton + Inter, azul elétrico, verde-limão, laranja e preto. */
 
 @theme {
   --color-preto: #080808;
-  --color-preto-2: #0c0c0c;
-  --color-preto-3: #101010;
+  --color-preto-2: #111111;
+  --color-preto-3: #181818;
   --color-branco: #ffffff;
-  --color-osso: #f5f5f2;
-  --color-acido: #d7ff1f;
-  --color-brasa: #ff3b14;
+  --color-osso: #f7f7f2;
+  --color-acido: #d8ff00;
+  --color-brasa: #ff5b1a;
+  --color-amarelo: #d8ff00;
+  --color-verde: #d8ff00;
+  --color-azul: #0b31ff;
+  --color-roxo: #0b31ff;
 
   --font-display: var(--font-anton), "Anton", Impact, "Arial Narrow", sans-serif;
-  --font-wide: var(--font-archivo), "Archivo", Arial, sans-serif;
-  --font-sans: var(--font-manrope), "Manrope", system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-wide: var(--font-inter), "Inter", Arial, sans-serif;
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-inter), "Inter", sans-serif;
 
   --ease-filme: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -114,21 +113,19 @@ body {
    poderem sobrescrever — CSS fora de camada sempre venceria. */
 @layer components {
 
-  /* display: Anton — títulos gigantes, condensados, caixa alta */
+  /* Anton, a mesma fonte dos títulos da referência. */
   .display {
     font-family: var(--font-display);
     font-weight: 400;
     text-transform: uppercase;
-    line-height: 0.84;
-    letter-spacing: -0.012em;
+    line-height: 0.9;
+    letter-spacing: -0.025em;
     font-kerning: normal;
   }
 
-  /* wide: Archivo expandida e pesada — rótulos, logo, botões */
+  /* Inter pesada nos rótulos, na navegação e nos botões. */
   .wide {
     font-family: var(--font-wide);
-    font-stretch: 125%;
-    font-variation-settings: "wdth" 125;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -306,5 +303,147 @@ body {
     opacity: 1;
     transform: none;
     clip-path: none;
+  }
+}
+
+/* Blocos de cor sólidos, etiquetas e sombras duras da referência. */
+.campanha-clara {
+  --color-preto: #f7f7f2;
+  --color-preto-2: #f0f0eb;
+  --color-preto-3: #e7e7e2;
+  --color-osso: #080808;
+  --color-acido: #0b31ff;
+  color: var(--color-osso);
+  color-scheme: light;
+}
+.campanha-azul {
+  --color-preto: #0b31ff;
+  --color-preto-2: #0b31ff;
+  --color-preto-3: #0b31ff;
+  --color-osso: #f7f7f2;
+  --color-acido: #d8ff00;
+  color: var(--color-osso);
+  color-scheme: dark;
+}
+.campanha-laranja {
+  --color-preto: #ff5b1a;
+  --color-preto-2: #ff5b1a;
+  --color-preto-3: #ff5b1a;
+  --color-osso: #080808;
+  --color-acido: #080808;
+  color: var(--color-osso);
+  color-scheme: light;
+}
+.faixa-espectro { background: #d8ff00; color: #080808; }
+.faixa-azul { background: #0b31ff; color: #d8ff00; }
+.faixa-laranja { background: #ff5b1a; color: #080808; }
+.texto-espectro { color: var(--color-acido); }
+.poster-titulo {
+  -webkit-text-stroke: 0;
+  text-shadow: .035em .035em 0 rgb(11 49 255 / .65);
+}
+.poster-titulo .mascara { padding-inline: .08em; }
+.campanha-logo { filter: brightness(0); }
+.campanha-clara .sombra-filme, .campanha-laranja .sombra-filme { text-shadow: none; }
+.campanha-clara .poster-titulo { text-shadow: .035em .035em 0 #d8ff00; }
+.botao-principal, .campanha-clara .botao-principal {
+  background: #d8ff00;
+  color: #080808;
+}
+.botao-etiqueta { border: 2px solid #080808; box-shadow: 6px 6px 0 #ff5b1a; }
+.campanha-laranja .botao-etiqueta, .campanha-clara .botao-etiqueta { box-shadow: 6px 6px 0 #0b31ff; }
+.campanha-laranja .botao-principal + span { background: #080808; color: #d8ff00; --tw-ring-color: #080808; }
+.campanha-laranja .botao-principal + span:hover { background: #0b31ff; }
+
+header::after, footer::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  background: #0b31ff;
+  pointer-events: none;
+}
+footer::before { inset: 0 0 auto; height: 6px; background: #d8ff00; }
+::selection { background: #d8ff00; color: #080808; }
+
+/* A mão GRAÇA percorre a tela e salta suavemente sobre a nuvem. */
+.graca-flutuante {
+  position: fixed;
+  left: 0;
+  bottom: 18px;
+  z-index: 45;
+  width: 104px;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: graca-percurso 24s linear infinite;
+}
+.graca-mascote {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(4px 6px 0 rgb(0 0 0 / .25));
+  animation: graca-flutuar 2.8s ease-in-out infinite;
+}
+@keyframes graca-percurso {
+  0% { transform: translate3d(-130px, 0, 0) rotate(-2deg); opacity: 0; }
+  4% { opacity: 1; }
+  18% { transform: translate3d(30vw, 0, 0) rotate(4deg); }
+  25% { transform: translate3d(46vw, -58px, 0) rotate(-11deg); }
+  33% { transform: translate3d(64vw, 0, 0) rotate(3deg); }
+  46% { transform: translate3d(calc(100vw + 130px), 0, 0) rotate(0); opacity: 1; }
+  49%, 52% { transform: translate3d(calc(100vw + 130px), 0, 0) scaleX(-1); opacity: 0; }
+  56% { opacity: 1; }
+  66% { transform: translate3d(72vw, 0, 0) scaleX(-1) rotate(4deg); }
+  74% { transform: translate3d(50vw, -64px, 0) scaleX(-1) rotate(-11deg); }
+  83% { transform: translate3d(28vw, 0, 0) scaleX(-1) rotate(3deg); }
+  97% { opacity: 1; }
+  100% { transform: translate3d(-130px, 0, 0) scaleX(-1); opacity: 0; }
+}
+@keyframes graca-flutuar {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-9px) rotate(2deg); }
+}
+@media (max-width: 767px) {
+  .graca-flutuante { width: 76px; bottom: 28px; animation-duration: 20s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .graca-flutuante { display: none; }
+}
+
+/* A máscara acompanha o tamanho real da fonte, incluindo acentos e sombra. */
+.hero-conteudo {
+  padding-top: calc(var(--cabecalho) + 1rem);
+  padding-bottom: 6rem;
+}
+.hero-titulo { line-height: 1.12; }
+.hero-titulo .hero-linha {
+  font-size: min(22vw, 23dvh);
+  line-height: 1.12;
+  padding: .13em .09em .16em;
+  margin: -.05em 0;
+}
+.hero-palavra { font-size: inherit; line-height: inherit; }
+.hero-titulo .hero-local {
+  font-size: clamp(14px, 2.3vw, 28px);
+  line-height: 1.45;
+  padding: .3em .2em .18em;
+  margin: .35em 0 0;
+  letter-spacing: .12em;
+}
+.hero-local .wide { line-height: inherit; letter-spacing: inherit; }
+.hero-legenda { margin-top: clamp(12px, 2dvh, 24px); }
+@media (max-height: 700px) and (orientation: landscape) {
+  .hero-titulo .hero-linha { font-size: min(19vw, 20dvh); }
+  .hero-conteudo { padding-bottom: 4.5rem; }
+  .hero-legenda { gap: .4rem; }
+  .hero-indicador { display: none; }
+}
+@media (max-height: 540px) and (orientation: landscape) {
+  .hero-titulo .hero-linha { font-size: min(19vw, 16dvh); }
+  .hero-conteudo {
+    padding-top: calc(var(--cabecalho) + .5rem);
+    padding-bottom: 3.25rem;
   }
 }

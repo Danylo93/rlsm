@@ -98,7 +98,7 @@ export default function Discipulado() {
                         <span className="mono mb-3 text-[11px] text-acido">
                             {String(i + 1).padStart(2, '0')} / 03
                         </span>
-                        <h3 className="display sombra-filme text-[min(27vw,40dvh)] leading-[0.8]">
+                        <h3 className="display sombra-filme text-[min(21vw,28dvh)] leading-[1.05]">
                             <span ref={(el) => { letrasRef.current[i] = el }} className="inline-block">
                                 {p.palavra}
                             </span>

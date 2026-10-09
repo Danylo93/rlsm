@@ -57,7 +57,7 @@ export default function LightLeak() {
                 className="absolute -bottom-[45%] -right-[25%] h-[110%] w-[80%] opacity-0"
                 style={{
                     background:
-                        'radial-gradient(closest-side, rgba(255,214,140,0.42), rgba(255,170,90,0.12) 60%, transparent 78%)',
+                        'radial-gradient(closest-side, rgba(11,49,255,0.42), rgba(11,49,255,0.12) 60%, transparent 78%)',
                 }}
             />
         </div>

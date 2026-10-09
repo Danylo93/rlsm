@@ -31,6 +31,8 @@ export type Transicao =
     | 'preto' // mergulho no preto
 
 export interface Camera {
+    /** Preserva a foto inteira quando o retrato aparece em telas largas. */
+    enquadramento?: 'cobrir' | 'conter'
     /** zoom inicial/final (1 = cobre a tela) */
     z0: number
     z1: number
@@ -147,4 +149,4 @@ export function limitesPlanos(cena: CenaFilme): number[] {
     return cena.planos.map((pl, k) => pl.ate ?? (k + 1) / n)
 }
 
-export const CAMERA_PADRAO: Camera = { z0: 1.14, z1: 1.03, px0: 0, px1: 0, py0: 0, py1: 0, r0: 0, r1: 0 }
+export const CAMERA_PADRAO: Camera = { z0: 1.04, z1: 1.01, px0: 0, px1: 0, py0: 0, py1: 0, r0: 0, r1: 0 }

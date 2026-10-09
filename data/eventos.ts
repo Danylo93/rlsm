@@ -1,14 +1,9 @@
 /**
- * Agenda do RL São Miguel.
- *
- * Para cadastrar um evento, copie um bloco e edite. Eventos que já passaram
- * somem sozinhos do site (comparação feita no navegador de quem visita).
- * O primeiro evento futuro vira o destaque "PRÓXIMO MOVIMENTO".
- *
- * ⚠ As datas abaixo são EXEMPLOS — troque pelas datas reais.
+ * Agenda oficial do RL São Miguel.
+ * Eventos encerrados continuam visíveis, riscados. Cultos se repetem aos sábados.
  */
 
-export type TipoEvento = 'culto-rl' | 'united-day' | 'encontro' | 'conferencia' | 'batismo' | 'rede'
+export type TipoEvento = 'culto-rl' | 'united-day' | 'encontro' | 'conferencia' | 'batismo' | 'rede' | 'amor-que-pensa'
 
 export const tiposEvento: Record<TipoEvento, string> = {
     'culto-rl': 'Culto RL',
@@ -17,6 +12,7 @@ export const tiposEvento: Record<TipoEvento, string> = {
     conferencia: 'Conferência',
     batismo: 'Batismo',
     rede: 'Rede',
+    'amor-que-pensa': 'Amor que pensa',
 }
 
 export interface Evento {
@@ -27,6 +23,7 @@ export interface Evento {
     data: string
     /** para eventos de mais de um dia (AAAA-MM-DD) */
     dataFim?: string
+    recorrencia?: 'sabados'
     /** HH:MM */
     hora?: string
     local: string
@@ -39,54 +36,39 @@ export interface Evento {
 
 export const eventos: Evento[] = [
     {
-        id: 'culto-rl-out-1',
-        nome: 'Culto RL',
-        tipo: 'culto-rl',
-        data: '2026-10-10',
-        hora: '19:30',
-        local: 'Videira São Miguel',
-        descricao: 'Louvor alto, Palavra direta e gente nova chegando. Traz alguém.',
-        imagem: '/img/cenas/mov-culto.webp',
-    },
-    {
         id: 'united-day-2026',
         nome: 'United Day',
         tipo: 'united-day',
         data: '2026-10-03',
-        hora: '15:00',
         local: 'Videira São Miguel',
-        descricao: 'Um dia inteiro com a rede toda junta. Esporte, comida, adoração.',
         imagem: '/img/cenas/mov-united.webp',
     },
     {
-        id: 'encontro-nov',
-        nome: 'Encontro com Deus',
+        id: 'encontro-out-2026',
+        nome: 'Encontro com DEUS Videira São Miguel',
         tipo: 'encontro',
-        data: '2026-11-13',
-        dataFim: '2026-11-15',
-        local: 'Local a confirmar',
-        descricao: 'Três dias pra desligar de tudo e ligar no que importa.',
+        data: '2026-10-09',
+        dataFim: '2026-10-11',
+        local: 'Videira São Miguel',
         imagem: '/img/cenas/mov-encontro.webp',
     },
     {
-        id: 'batismo-nov',
-        nome: 'Batismo',
-        tipo: 'batismo',
-        data: '2026-11-29',
-        hora: '10:00',
+        id: 'culto-rl-sabados',
+        nome: 'Culto dos RL São Miguel',
+        tipo: 'culto-rl',
+        data: '2026-10-10',
+        recorrencia: 'sabados',
         local: 'Videira São Miguel',
-        descricao: 'Decidiu seguir Jesus? Esse é o próximo passo.',
-        imagem: '/img/cenas/mov-batismo.webp',
+        descricao: 'Todos os sábados.',
+        imagem: '/img/cenas/mov-culto.webp',
     },
     {
-        id: 'conferencia-dez',
-        nome: 'Conferência da Rede',
-        tipo: 'conferencia',
-        data: '2026-12-03',
-        hora: '18:00',
+        id: 'amor-que-pensa-2026',
+        nome: 'Amor que pensa',
+        tipo: 'amor-que-pensa',
+        data: '2026-11-14',
         local: 'Local a confirmar',
-        descricao: 'A gente vai junto. Caravana saindo de São Miguel.',
-        imagem: '/img/cenas/mov-eventos.webp',
+        imagem: '/img/cenas/amor-que-pensa.webp',
     },
 ]
 
@@ -98,11 +80,31 @@ export function paraData(iso: string) {
     return new Date(a, m - 1, d)
 }
 
-export function proximosEventos(lista: Evento[], hoje = new Date()) {
-    const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())
+/** Dia oficial da agenda, independente do fuso de quem acessa. */
+export function diaSaoPaulo(agora = new Date()) {
+    const partes = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).formatToParts(agora)
+    const parte = (tipo: string) => partes.find((p) => p.type === tipo)!.value
+    return `${parte('year')}-${parte('month')}-${parte('day')}`
+}
+
+export function eventoEncerrado(e: Evento, hoje = diaSaoPaulo()) {
+    return !e.recorrencia && (e.dataFim ?? e.data) < hoje
+}
+
+export function proximosEventos(lista: Evento[], agora = new Date()) {
+    const hoje = diaSaoPaulo(agora)
     return lista
-        .filter((e) => paraData(e.dataFim ?? e.data) >= inicioHoje)
-        .sort((a, b) => paraData(a.data).getTime() - paraData(b.data).getTime())
+        .filter((e) => !eventoEncerrado(e, hoje))
+        .map((e) => {
+            if (!e.recorrencia) return e
+            const proximo = paraData(hoje > e.data ? hoje : e.data)
+            proximo.setDate(proximo.getDate() + (6 - proximo.getDay() + 7) % 7)
+            const data = `${proximo.getFullYear()}-${String(proximo.getMonth() + 1).padStart(2, '0')}-${String(proximo.getDate()).padStart(2, '0')}`
+            return { ...e, data }
+        })
+        .sort((a, b) => a.data.localeCompare(b.data))
 }
 
 const SEMANA = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB']
@@ -145,6 +147,7 @@ export function linkAgenda(e: Evento) {
         details: e.descricao ?? '',
         location: [e.local, e.endereco].filter(Boolean).join(' — '),
         ctz: 'America/Sao_Paulo',
+        ...(e.recorrencia ? { recur: 'RRULE:FREQ=WEEKLY;BYDAY=SA' } : {}),
     })
     return `https://calendar.google.com/calendar/render?${p.toString()}`
 }

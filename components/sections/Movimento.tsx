@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * CENA 06 — Movimento.
+ * CENA 06 — Legado.
  * Montagem rápida (o canvas troca de plano com corte seco + micro-glitch) e
  * letras gigantes atravessando a tela na horizontal.
  */
@@ -55,7 +55,7 @@ export default function Movimento() {
     if (!filme) {
         return (
             <div className="px-4 py-28 sm:px-8">
-                <Kicker className="mb-6">06 — Movimento</Kicker>
+                <Kicker className="mb-6">06 — Legado</Kicker>
                 <h2 className="display text-[min(16vw,22dvh)] leading-[0.86]">
                     Não somos espectadores. <span className="text-acido">Fazemos parte.</span>
                 </h2>
@@ -85,7 +85,7 @@ export default function Movimento() {
                 className="display contorno absolute left-0 top-1/2 whitespace-nowrap text-[min(22dvh,20vw)] leading-none"
                 style={{ opacity: 0 }}
             >
-                Movimento ✦ Movimento ✦ Movimento ✦ Movimento ✦ Movimento
+                Legado ✦ Legado ✦ Legado ✦ Legado ✦ Legado
             </p>
 
             <p

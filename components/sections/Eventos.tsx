@@ -11,34 +11,40 @@ import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import gsap from 'gsap'
 import Botao from '@/components/ui/Botao'
 import { Kicker } from '@/components/ui/Tipo'
-import { eventos, linkAgenda, partesData, proximosEventos, tiposEvento, type Evento } from '@/data/eventos'
+import { diaSaoPaulo, eventoEncerrado, eventos, linkAgenda, partesData, proximosEventos, tiposEvento, type Evento } from '@/data/eventos'
 import { linkWhatsApp, site } from '@/data/site'
 
-const semInscricao = () => () => {}
-const inicioDeHoje = () => {
-    const d = new Date()
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+// Atualiza a agenda mesmo se a página ficar aberta na virada do dia.
+const inscreverDia = (avisar: () => void) => {
+    const timer = window.setInterval(avisar, 30_000)
+    window.addEventListener('focus', avisar)
+    return () => {
+        window.clearInterval(timer)
+        window.removeEventListener('focus', avisar)
+    }
 }
+const inicioDeHoje = () => diaSaoPaulo()
+const diaNoServidor = () => ''
 
 const linkEvento = (e: Evento) =>
     e.link ?? linkWhatsApp(`Oi! Eu vou no ${e.nome} (${partesData(e).curta})! Quero mais informações.`)
 
 export default function Eventos() {
-    // no servidor (build) "hoje" = 0 e todos aparecem; no navegador some o que já passou
-    const hoje = useSyncExternalStore(semInscricao, inicioDeHoje, () => 0)
-    const lista = useMemo(() => proximosEventos(eventos, new Date(hoje)), [hoje])
+    const hoje = useSyncExternalStore(inscreverDia, inicioDeHoje, diaNoServidor)
+    const lista = useMemo(() => hoje ? proximosEventos(eventos, new Date(`${hoje}T12:00:00-03:00`)) : [], [hoje])
+    const encerrados = hoje ? eventos.filter((e) => eventoEncerrado(e, hoje)) : []
 
     const [destaque, ...resto] = lista
 
     return (
-        <section id="eventos" aria-labelledby="titulo-eventos" className="relative bg-preto px-4 py-28 sm:px-8 sm:py-40">
+        <section id="eventos" aria-labelledby="titulo-eventos" className="campanha-laranja relative bg-preto px-4 py-28 sm:px-8 sm:py-40">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <Kicker className="mb-6">08 — Agenda</Kicker>
-                    <h2 id="titulo-eventos" data-revelar className="display text-[clamp(48px,15.5vw,250px)] leading-[0.8]">
-                        Próximo
+                    <h2 id="titulo-eventos" data-revelar className="display text-[clamp(48px,15.5vw,250px)] leading-[0.96]">
+                        Vamos pro
                         <br />
-                        <span className="contorno-acido">movimento</span>
+                        <span className="texto-espectro">Next Level?</span>
                     </h2>
                 </div>
                 <p data-revelar className="ui-escala wide max-w-[24ch] text-[13px] leading-relaxed tracking-[0.08em] text-osso/70" style={{ '--atraso': '150ms' } as React.CSSProperties}>
@@ -46,9 +52,25 @@ export default function Eventos() {
                 </p>
             </div>
 
-            {destaque ? <Destaque e={destaque} /> : <SemEventos />}
+            {hoje && (destaque ? <Destaque e={destaque} /> : <SemEventos />)}
 
             {resto.length > 0 && <Tracklist itens={resto} />}
+            {encerrados.length > 0 && (
+                <div className="mt-16 border-t border-osso/15 pt-8">
+                    <h3 className="mono mb-5 text-[11px] text-osso/50">Já aconteceu</h3>
+                    <ul>
+                        {encerrados.map((e) => (
+                            <li key={e.id} className="flex flex-wrap items-baseline gap-x-6 gap-y-2 border-b border-osso/15 py-5 text-osso/45">
+                                <s className="display text-[clamp(28px,4vw,64px)] decoration-2">
+                                    <time dateTime={e.data}>{partesData(e).curta}.{partesData(e).ano}</time>
+                                    {' — '}{e.nome}
+                                </s>
+                                <span className="mono text-[10px]">Encerrado</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </section>
     )
 }
@@ -59,15 +81,15 @@ function Destaque({ e }: { e: Evento }) {
         <article className="mt-16 grid gap-10 border-t border-osso/15 pt-10 sm:mt-24 lg:grid-cols-12 lg:gap-12">
             <div className="lg:col-span-5">
                 <p className="mono mb-4 text-[11px] text-osso/50">Próximo</p>
-                <p data-revelar className="display text-[clamp(120px,19vw,320px)] leading-[0.78] tabular-nums text-acido">
+                <p data-revelar className={`display ${e.dataFim ? 'text-[clamp(56px,8vw,140px)]' : 'text-[clamp(120px,19vw,320px)]'} leading-[0.78] tabular-nums text-acido`}>
                     <time dateTime={e.data}>
-                        {d.dia}
+                        {e.dataFim ? `${d.dia}–${partesData({ ...e, data: e.dataFim, dataFim: undefined }).dia}` : d.dia}
                         <span className="text-osso/25">.</span>
                         {d.mes}
                     </time>
                 </p>
                 <p className="wide mt-5 text-[13px] tracking-[0.14em]">
-                    {d.semana}
+                    {e.recorrencia ? 'Todos os sábados' : d.semana}
                     {e.hora && <> · {e.hora.replace(':', 'H')}</>} · {d.ano}
                 </p>
             </div>
@@ -83,7 +105,7 @@ function Destaque({ e }: { e: Evento }) {
                     </figure>
                 )}
                 <div>
-                    <h3 data-revelar className="display corte-editorial text-[clamp(52px,7.5vw,128px)] leading-[0.84]">
+                    <h3 data-revelar className="display corte-editorial text-[clamp(52px,7.5vw,128px)] leading-[0.98]">
                         {e.nome}
                     </h3>
                     <dl className="ui-escala mono mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1.5 text-[11px]">
@@ -122,26 +144,53 @@ function Tracklist({ itens }: { itens: Evento[] }) {
         if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
         const xTo = gsap.quickTo(previa, 'x', { duration: 0.6, ease: 'power3.out' })
         const yTo = gsap.quickTo(previa, 'y', { duration: 0.6, ease: 'power3.out' })
+        let aguardarMovimento = false
         const mover = (ev: PointerEvent) => {
+            if (aguardarMovimento) {
+                aguardarMovimento = false
+                entrar(ev)
+            }
             xTo(ev.clientX)
             yTo(ev.clientY)
         }
+        const sair = () => gsap.to(previa, { clipPath: 'inset(100% 0 0 0)', opacity: 0, duration: 0.2, overwrite: true })
         const entrar = (ev: PointerEvent) => {
+            if (aguardarMovimento) return
             const li = (ev.target as HTMLElement).closest<HTMLElement>('[data-imagem]')
-            if (!li || !imgRef.current) return
+            if (!li || !imgRef.current) {
+                sair()
+                return
+            }
             const src = li.dataset.imagem!
             if (imgRef.current.getAttribute('src') !== src) imgRef.current.src = src
-            gsap.to(previa, { clipPath: 'inset(0% 0 0 0)', opacity: 1, rotate: li.dataset.rot, duration: 0.5, ease: 'expo.out' })
+            gsap.to(previa, { clipPath: 'inset(0% 0 0 0)', opacity: 1, rotate: li.dataset.rot, duration: 0.5, ease: 'expo.out', overwrite: true })
         }
-        const sair = () => gsap.to(previa, { clipPath: 'inset(100% 0 0 0)', opacity: 0, duration: 0.4, ease: 'expo.in' })
+        const aoRolar = () => {
+            aguardarMovimento = true
+            sair()
+        }
+        const sairDaLinha = (ev: PointerEvent) => {
+            const linha = (ev.target as HTMLElement).closest('[data-imagem]')
+            if (linha && ev.relatedTarget instanceof Node && linha.contains(ev.relatedTarget)) return
+            sair()
+        }
         gsap.set(previa, { xPercent: -50, yPercent: -60, clipPath: 'inset(100% 0 0 0)', opacity: 0 })
         lista.addEventListener('pointermove', mover)
         lista.addEventListener('pointerover', entrar)
         lista.addEventListener('pointerleave', sair)
+        lista.addEventListener('pointerout', sairDaLinha)
+        window.addEventListener('scroll', aoRolar, true)
+        window.addEventListener('blur', sair)
         return () => {
             lista.removeEventListener('pointermove', mover)
             lista.removeEventListener('pointerover', entrar)
             lista.removeEventListener('pointerleave', sair)
+            lista.removeEventListener('pointerout', sairDaLinha)
+            window.removeEventListener('scroll', aoRolar, true)
+            window.removeEventListener('blur', sair)
+            xTo.tween.kill()
+            yTo.tween.kill()
+            gsap.killTweensOf(previa)
         }
     }, [])
 
@@ -171,7 +220,7 @@ function Tracklist({ itens }: { itens: Evento[] }) {
                                     className="absolute inset-0 origin-bottom scale-y-0 bg-acido transition-transform duration-500 ease-[var(--ease-filme)] group-hover:scale-y-100 group-focus-visible:scale-y-100"
                                 />
                                 <time dateTime={e.data} className="display relative text-[clamp(28px,3.4vw,54px)] tabular-nums text-acido transition-colors duration-300 group-hover:text-preto">
-                                    {d.curta}
+                                    {e.recorrencia ? 'Sábados' : d.curta}
                                 </time>
                                 <span className="display relative text-[clamp(30px,4.6vw,78px)] leading-[0.9] transition-colors duration-300 group-hover:text-preto">
                                     {e.nome}

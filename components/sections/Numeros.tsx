@@ -134,7 +134,7 @@ function Trilho() {
 
 export default function Numeros() {
     return (
-        <Cena id="numeros" rotulo="Em números" alturaVh={420} className="bg-preto-2">
+        <Cena id="numeros" rotulo="Em números" alturaVh={420} className="campanha-azul bg-preto-2">
             <Trilho />
         </Cena>
     )

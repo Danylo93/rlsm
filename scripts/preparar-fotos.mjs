@@ -2,9 +2,9 @@
 /**
  * Prepara as fotos do site a partir de `fotos-originais/`.
  *
- *   fotos-originais/hero.jpg      →  public/img/cenas/hero.webp      (desktop, 2048px)
+ *   fotos-originais/hero.jpg      →  public/img/cenas/hero.webp      (desktop, até 3840px)
  *                                     public/img/cenas/hero-m.webp    (mobile, retrato 2:3)
- *   fotos-originais/g-01.jpg      →  public/img/galeria/g-01.webp    (1100px)
+ *   fotos-originais/g-01.jpg      →  public/img/galeria/g-01.webp    (até 3840px)
  *
  * Uso:  npm run fotos
  *
@@ -31,35 +31,20 @@ const dirGaleria = join(raiz, 'public', 'img', 'galeria')
 const CONFIG = {
     hero: { foco: 0.5 },
     geracao: { foco: 0.42 },
-    presenca: {
-        foco: 0.52,
-        frente: {
-            // luminância (0..255): abaixo de `escuro` = pessoa; acima de `claro` = fundo
-            escuro: 52,
-            claro: 100,
-            // suavização das bordas das regiões (fração da imagem)
-            borda: 0.035,
-            // regiões (normalizadas) onde a camada de frente vale
-            regioes: [
-                { x0: 0.40, x1: 0.62, y0: 0.32, y1: 1 }, // mão erguida + braço
-                { x0: 0.15, x1: 0.26, y0: 0.50, y1: 1 }, // mão à esquerda
-                { x0: 0, x1: 1, y0: 0.64, y1: 1 }, // cabeças em primeiro plano
-            ],
-        },
-    },
+    presenca: { foco: 0.5 },
     'celula-1': { foco: 0.55 },
     'celula-2': { foco: 0.5 },
     discipulado: { foco: 0.5 },
     cuidar: { foco: 0.5 },
-    treinar: { foco: 0.62 },
+    treinar: {},
     enviar: { foco: 0.68 },
     'mov-evangelismo': { foco: 0.4 },
     cta: { foco: 0.5 },
 }
 
-const LARGURA_DESKTOP = 2048
-const MOBILE = { w: 1080, h: 1620 }
-const LARGURA_GALERIA = 1100
+const LARGURA_DESKTOP = 3840
+const MOBILE = { w: 2560, h: 3840 }
+const LARGURA_GALERIA = 3840
 
 for (const d of [dirCenas, dirGaleria]) mkdirSync(d, { recursive: true })
 
@@ -128,7 +113,7 @@ for (const f of arquivos) {
     if (nome.startsWith('g-')) {
         await sharp(origem)
             .rotate()
-            .resize({ width: LARGURA_GALERIA, withoutEnlargement: true })
+            .resize({ width: LARGURA_GALERIA, height: LARGURA_GALERIA, fit: 'inside' })
             .webp({ quality: 72 })
             .toFile(join(dirGaleria, `${nome}.webp`))
         console.log(`✓ galeria/${nome}.webp`)
@@ -136,15 +121,16 @@ for (const f of arquivos) {
     }
 
     const cfg = CONFIG[nome] ?? {}
-    const meta = await sharp(origem).rotate().metadata()
+    const orientada = await sharp(origem).rotate().toBuffer()
+    const meta = await sharp(orientada).metadata()
 
     await sharp(origem)
         .rotate()
-        .resize({ width: LARGURA_DESKTOP, withoutEnlargement: true })
+        .resize({ width: LARGURA_DESKTOP, height: LARGURA_DESKTOP, fit: 'inside' })
         .webp({ quality: 74 })
         .toFile(join(dirCenas, `${nome}.webp`))
 
-    const mobile = sharp(origem).rotate()
+    const mobile = sharp(orientada)
     if (cfg.foco !== undefined) mobile.extract(recorteMobile(meta, cfg.foco)).resize(MOBILE.w, MOBILE.h)
     else mobile.resize(MOBILE.w, MOBILE.h, { fit: 'cover', position: sharp.strategy.attention })
     await mobile.webp({ quality: 72 }).toFile(join(dirCenas, `${nome}-m.webp`))
@@ -153,7 +139,7 @@ for (const f of arquivos) {
         const frente = await camadaFrente(origem, cfg.frente)
         const buf = await frente.png().toBuffer()
         await sharp(buf)
-            .resize({ width: LARGURA_DESKTOP, withoutEnlargement: true })
+            .resize({ width: LARGURA_DESKTOP, height: LARGURA_DESKTOP, fit: 'inside' })
             .webp({ quality: 80, alphaQuality: 90 })
             .toFile(join(dirCenas, `${nome}-frente.webp`))
         await sharp(buf)

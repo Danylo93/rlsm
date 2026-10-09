@@ -7,6 +7,7 @@
  */
 
 import sharp from 'sharp'
+import { existsSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -19,7 +20,9 @@ const texto = (markup, dpi) =>
         .png()
         .toBuffer()
 
-const fundo = await sharp(join(raiz, 'fotos-originais', 'hero.jpg'))
+const heroJpg = join(raiz, 'fotos-originais', 'hero.jpg')
+const hero = existsSync(heroJpg) ? heroJpg : join(raiz, 'fotos-originais', 'hero.webp')
+const fundo = await sharp(hero)
     .resize(1200, 630, { fit: 'cover', position: 'centre' })
     .modulate({ brightness: 0.5, saturation: 0.85 })
     .toBuffer()

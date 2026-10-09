@@ -26,9 +26,9 @@ interface Props {
 }
 
 const estilos: Record<Variante, string> = {
-    acido: 'bg-acido text-preto',
-    brasa: 'bg-brasa text-preto',
-    escuro: 'bg-preto-3 text-osso border-y border-osso/10',
+    acido: 'faixa-espectro',
+    brasa: 'faixa-laranja',
+    escuro: 'faixa-azul border-y border-white/20',
     contorno: 'bg-transparent text-osso',
 }
 

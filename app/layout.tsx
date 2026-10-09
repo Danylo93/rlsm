@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
-import { Anton, Archivo, JetBrains_Mono, Manrope } from 'next/font/google'
+import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 import SmoothScroll from '@/components/cinematic/SmoothScroll'
 import Grain from '@/components/cinematic/Grain'
@@ -7,12 +8,11 @@ import { BarraProgresso } from '@/components/cinematic/ScrollProgress'
 import Cursor from '@/components/ui/Cursor'
 import Revelador from '@/components/ui/Revelador'
 import Header from '@/components/layout/Header'
+import GracaFlutuante from '@/components/ui/GracaFlutuante'
 import { site } from '@/data/site'
 
-const anton = Anton({ weight: '400', subsets: ['latin'], variable: '--font-anton', display: 'swap' })
-const archivo = Archivo({ subsets: ['latin'], variable: '--font-archivo', axes: ['wdth'], display: 'swap' })
-const manrope = Manrope({ subsets: ['latin'], variable: '--font-manrope', display: 'swap' })
-const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains', display: 'swap' })
+const anton = localFont({ src: '../assets/fonts/Anton-Regular.ttf', weight: '400', variable: '--font-anton', display: 'swap' })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
 
 const titulo = 'Radicais Livres São Miguel | Uma geração que se levanta'
 const descricao = 'Radicais Livres São Miguel. Destinados ao Avivamento'
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-    themeColor: '#080808',
-    colorScheme: 'dark',
+    themeColor: '#0b31ff',
+    colorScheme: 'light dark',
     viewportFit: 'cover',
 }
 
@@ -47,7 +47,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         // antes do React hidratar — a diferença é intencional (vale só para este elemento)
         <html
             lang="pt-BR"
-            className={`${anton.variable} ${archivo.variable} ${manrope.variable} ${mono.variable}`}
+            className={`${anton.variable} ${inter.variable}`}
             suppressHydrationWarning
         >
             <head>
@@ -69,6 +69,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
                 {children}
                 <Grain />
                 <Cursor />
+                <GracaFlutuante />
             </body>
         </html>
     )
