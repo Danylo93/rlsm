@@ -18,8 +18,6 @@ export default function Footer() {
                 <p className="display text-[clamp(56px,10.5vw,190px)] leading-[0.92]">
                     Nós Ainda não Vivemos
                     <br />
-                   
-                    <br />
                     <span className="text-acido">Tudo</span>
                 </p>
 

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rlsaomiguel.com.br/sitemap.xml

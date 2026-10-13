@@ -6,6 +6,7 @@
  * letras gigantes atravessando a tela na horizontal.
  */
 
+import Image from 'next/image'
 import { useContext, useRef } from 'react'
 import { ContextoFilme, mostrar, mover, useCena, useModo, useOculto } from '@/components/cinematic/contexto'
 import { clamp, faixa, janela, limitesPlanos } from '@/components/cinematic/motor'
@@ -62,8 +63,7 @@ export default function Movimento() {
                 <ul className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {planos.map((p) => (
                         <li key={p.src} className="relative aspect-[4/5] overflow-hidden">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={p.srcMobile ?? p.src} alt={p.rotulo ?? ''} loading="lazy" className="h-full w-full object-cover" />
+                            <Image src={p.srcMobile ?? p.src} alt={p.rotulo ?? ''} fill sizes="(max-width: 768px) 50vw, 25vw" loading="lazy" className="object-cover" />
                             <span className="wide absolute bottom-2 left-2 bg-preto px-2 py-1 text-[10px]">{p.rotulo}</span>
                         </li>
                     ))}

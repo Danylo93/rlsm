@@ -159,6 +159,12 @@ body {
     color: transparent;
     -webkit-text-stroke: max(1.5px, 0.011em) var(--color-preto);
   }
+
+  /* Texto secundário com opacidade mínima de 60% para acessibilidade */
+  .texto-secundario {
+    color: var(--color-osso);
+    opacity: 0.65;
+  }
 }
 
 /* ---------- utilidades do filme ---------- */

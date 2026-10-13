@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import Cena from '@/components/cinematic/Cena'
 import { mostrar, mover, useModo, useOculto, useProgresso } from '@/components/cinematic/contexto'
 import { faixa, janela, lerp } from '@/components/cinematic/motor'
@@ -34,12 +35,12 @@ function Foto({ f, i, estatico, fRef }: { f: FotoGaleria; i: number; estatico: b
                 estatico ? 'relative w-[44%] sm:w-[30%]' : `absolute left-1/2 top-1/2 ${f.camada === 'frente' ? 'z-30' : 'z-10'}`
             }`}
         >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
                 src={f.src}
                 alt={f.alt}
+                fill
+                sizes="(max-width: 768px) 50vw, 30vw"
                 loading="lazy"
-                decoding="async"
                 className="aspect-[4/5] w-full object-cover [filter:contrast(1.05)_saturate(0.9)]"
             />
             {f.legenda && (

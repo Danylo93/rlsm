@@ -7,6 +7,7 @@
  * Dados em data/eventos.ts.
  */
 
+import Image from 'next/image'
 import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 import gsap from 'gsap'
 import Botao from '@/components/ui/Botao'
@@ -75,8 +76,7 @@ function Destaque({ e }: { e: Evento }) {
             <div className="flex flex-col gap-8 lg:col-span-7">
                 {e.imagem && (
                     <figure data-revelar="imagem" className="relative aspect-[16/10] overflow-hidden bg-preto-3 sm:aspect-[16/9]">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={e.imagem} alt="" loading="lazy" className="h-full w-full object-cover grayscale-[35%]" />
+                        <Image src={e.imagem} alt="" fill sizes="(max-width: 1024px) 100vw, 58vw" loading="lazy" className="object-cover grayscale-[35%]" />
                         <figcaption className="mono absolute left-3 top-3 bg-preto px-2 py-1 text-[10px]">
                             {tiposEvento[e.tipo]}
                         </figcaption>
@@ -87,12 +87,12 @@ function Destaque({ e }: { e: Evento }) {
                         {e.nome}
                     </h3>
                     <dl className="ui-escala mono mt-5 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1.5 text-[11px]">
-                        <dt className="text-osso/45">Local</dt>
+                        <dt className="texto-secundario">Local</dt>
                         <dd>
                             {e.local}
-                            {e.endereco && <span className="text-osso/60"> — {e.endereco}</span>}
+                            {e.endereco && <span className="texto-secundario"> — {e.endereco}</span>}
                         </dd>
-                        <dt className="text-osso/45">Tipo</dt>
+                        <dt className="texto-secundario">Tipo</dt>
                         <dd>{tiposEvento[e.tipo]}</dd>
                     </dl>
                     {e.descricao && <p className="mt-5 max-w-[42ch] text-[17px] leading-snug text-osso/85 sm:text-lg 3xl:text-2xl">{e.descricao}</p>}
