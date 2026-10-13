@@ -26,12 +26,12 @@ export default function Header() {
         <>
             <header
                 className={`fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,backdrop-filter] duration-500 ${
-                    solido ? 'border-osso/10 bg-preto/70 backdrop-blur-md' : 'border-transparent bg-transparent'
+                    solido ? 'campanha-clara border-osso/10 bg-preto/95 backdrop-blur-md' : 'border-transparent bg-transparent'
                 }`}
             >
                 <div className="flex h-[var(--cabecalho)] items-center justify-between px-4 sm:px-8">
                     <a href="#inicio" aria-label="Radicais Livres São Miguel — voltar ao início" data-cursor="TOPO" className="ui-escala">
-                        <Logo />
+                        <Logo className={solido ? 'campanha-logo' : ''} />
                     </a>
 
                     <nav aria-label="Principal" className="ui-escala hidden lg:block">
@@ -55,7 +55,7 @@ export default function Header() {
                     <div className="ui-escala flex items-center gap-2">
                         <a
                             href="#fazer-parte"
-                            className="wide hidden h-10 items-center bg-acido px-4 text-[11px] tracking-[0.1em] text-preto transition-colors hover:bg-osso baixo:h-9 sm:inline-flex"
+                            className="botao-principal wide hidden h-10 items-center bg-acido px-4 text-[11px] tracking-[0.1em] text-preto transition-colors hover:bg-osso baixo:h-9 sm:inline-flex"
                         >
                             <span className="rolar">
                                 <span>Fazer parte</span>

@@ -7,11 +7,11 @@ export const site = {
     nome: 'Radicais Livres São Miguel',
     curto: 'RL São Miguel',
     igreja: 'Videira São Miguel',
-    lema: 'Uma geração que se levanta.',
+    lema: 'Nós ainda não vivemos Tudo.',
     url: process.env.NEXT_PUBLIC_SITE_URL || 'https://rlsaomiguel.com.br',
 
     /** número com DDI+DDD, só dígitos. Ex.: '5511999999999'. Vazio = WhatsApp abre sem destinatário. */
-    whatsapp: '',
+    whatsapp: '5511934079208',
     instagram: '', // ex.: 'https://www.instagram.com/seu-perfil'
     youtube: '',
     /** endereço exibido no rodapé e nos eventos (opcional) */

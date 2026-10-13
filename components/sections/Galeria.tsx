@@ -41,7 +41,12 @@ function Foto({ f, i, estatico, fRef }: { f: FotoGaleria; i: number; estatico: b
                 fill
                 sizes="(max-width: 768px) 50vw, 30vw"
                 loading="lazy"
+<<<<<<< HEAD
                 className="aspect-[4/5] w-full object-cover [filter:contrast(1.05)_saturate(0.9)]"
+=======
+                decoding="async"
+                className={`${f.paisagem ? 'aspect-[4/3] object-contain' : 'aspect-[4/5] object-cover'} w-full [filter:contrast(1.05)_saturate(0.9)]`}
+>>>>>>> d0f250706d1a6afce41c7c8899409d5c6f888247
             />
             {f.legenda && (
                 <figcaption className="mono absolute bottom-[clamp(5px,0.6vw,10px)] left-[clamp(6px,0.6vw,10px)] text-[clamp(8px,0.62vw,10px)] text-preto/70">
@@ -167,7 +172,7 @@ function Mural() {
 
 export default function Galeria() {
     return (
-        <Cena id="galeria" rotulo="Galeria" alturaVh={400} className="bg-preto">
+        <Cena id="galeria" rotulo="Galeria" alturaVh={400} className="campanha-azul bg-preto">
             <Mural />
         </Cena>
     )

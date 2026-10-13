@@ -21,7 +21,7 @@ const jsonLd = {
     name: site.nome,
     alternateName: site.curto,
     url: site.url,
-    description: 'Juventude da Videira São Miguel. Jovens vivendo Jesus, comunidade e propósito.',
+    description: 'Juventude da Videira São Miguel. Jovens destinados ao avivamento.',
     parentOrganization: { '@type': 'Church', name: site.igreja },
     sameAs: [site.instagram, site.youtube].filter(Boolean),
 }
@@ -48,7 +48,7 @@ export default function Inicio() {
                 <Marquee
                     variante="acido"
                     inclinacao={-2}
-                    itens={['Radicais Livres', 'São Miguel', 'Uma geração que se levanta', 'Jesus']}
+                    itens={['Radicais Livres', 'São Miguel', 'Nós ainda não vivemos Tudo', 'Jesus']}
                     className="-mb-4"
                 />
 
@@ -60,7 +60,7 @@ export default function Inicio() {
                     tamanho="xl"
                     reverso
                     velocidade={45}
-                    itens={['Radical Livre', 'Ainda não Vivemos Tudo', 'Vida com propósito']}
+                    itens={['Radical Livre', 'Ainda não Vivemos Tudo', 'Legado']}
                     className="border-y border-osso/10 bg-preto"
                 />
 
@@ -69,7 +69,7 @@ export default function Inicio() {
                 <Marquee
                     variante="escuro"
                     inclinacao={1.5}
-                    itens={['Não somos o futuro', 'Somos agora', 'Onde existe um jovem, existe uma missão']}
+                    itens={['Livreees', 'Uhaaaaa!!', 'Onde existe um Radical Livre, existe uma missão']}
                 />
 
                 {/* FILME 2 — manifesto e convite */}

@@ -9,7 +9,8 @@
  *
  * Fontes de imagem, por prioridade:
  *  1. Sequência de quadros de vídeo (public/filme/manifest.json): o progresso
- *     da cena vira índice de quadro → vídeo reversível pela rolagem.
+ *     da cena — ou do plano, quando o clipe é do plano — vira índice de
+ *     quadro → vídeo reversível pela rolagem.
  *  2. Fotos dos planos, com câmera Ken Burns (zoom, pan, rotação sutil).
  *
  * Também desenha uma segunda camada ("frente") com pessoas recortadas, que
@@ -30,6 +31,7 @@ import {
     type EstadoFilme,
     type Linha,
     type Luz,
+    type Plano,
     type Transicao,
 } from './motor'
 
@@ -49,9 +51,33 @@ interface Props {
     pronto: boolean
 }
 
+interface SequenciaQuadros {
+    pasta: string
+    quadros: number
+    mobile?: boolean
+    formato?: 'jpg' | 'webp'
+    /** quadros mantêm o primeiro plano parado: a camada `frente` da foto continua alinhada */
+    frente?: boolean
+}
+
 interface Manifesto {
     formato?: 'jpg' | 'webp'
-    cenas: Array<{ cena: number; pasta: string; quadros: number; mobile?: boolean }>
+    /** clipe da cena inteira (filme/clipes/cena-01.mp4) */
+    cenas?: Array<SequenciaQuadros & { cena: number }>
+    /** clipe de um plano (filme/clipes/<nome da foto>.mp4) */
+    clipes?: Array<SequenciaQuadros & { clipe: string }>
+}
+
+/** quadros de vídeo já trazem o movimento de câmera: só um respiro de zoom por cima */
+const CAMERA_VIDEO: Camera = { ...CAMERA_PADRAO, z0: 1, z1: 1.03 }
+
+const nomeClipe = (pl: Plano) => pl.video ?? pl.src.replace(/^.*\//, '').replace(/\.\w+$/, '')
+
+interface Quadros {
+    a: HTMLImageElement
+    /** quadro seguinte, desenhado por cima com opacidade `t` */
+    b: HTMLImageElement | null
+    t: number
 }
 
 interface Entrada {
@@ -62,6 +88,8 @@ interface Entrada {
     falhou: boolean
     cena: number
     peso: number
+    /** quadro de vídeo (as fotos passam na frente: cobrem a cena até os quadros chegarem) */
+    quadro: boolean
 }
 
 const PRETO = '#080808'
@@ -100,12 +128,12 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
         const cache = new Map<string, Entrada>()
         let ativas = 0
 
-        function pedir(src: string, cena: number, peso = 0): Entrada {
+        function pedir(src: string, cena: number, peso = 0, quadro = false): Entrada {
             let en = cache.get(src)
             if (!en) {
                 const img = new Image()
                 img.decoding = 'async'
-                en = { img, src, pronta: false, pedida: false, falhou: false, cena, peso }
+                en = { img, src, pronta: false, pedida: false, falhou: false, cena, peso, quadro }
                 cache.set(src, en)
                 bombear()
             }
@@ -118,7 +146,7 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
                 let nota = Infinity
                 for (const en of cache.values()) {
                     if (en.pedida) continue
-                    const n = Math.abs(en.cena - atual) * 10 + (en.cena < atual ? 4 : 0) + en.peso
+                    const n = Math.abs(en.cena - atual) * 10 + (en.cena < atual ? 4 : 0) + en.peso + (en.quadro ? 15 : 0)
                     if (n < nota) {
                         nota = n
                         melhor = en
@@ -155,11 +183,15 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
 
         const fonte = (p: { src: string; srcMobile?: string }) => (retrato && p.srcMobile ? p.srcMobile : p.src)
 
-        /** fotos de todas as cenas, na ordem do filme (são poucas e leves) */
+        /**
+         * fotos de todas as cenas, na ordem do filme (são poucas e leves). Plano com
+         * clipe não precisa da foto: os quadros-chave do clipe fazem esse papel.
+         */
         function pedirFotos() {
+            if (!manifestoLido) return
             cenas.forEach((c, i) =>
                 c.planos.forEach((pl, k) => {
-                    pedir(fonte(pl), i, k * 0.5)
+                    if (!temClipe(i, k)) pedir(fonte(pl), i, k * 0.5)
                     if (pl.frente) pedir(fonte(pl.frente), i, k * 0.5 + 0.2)
                 })
             )
@@ -167,47 +199,75 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
 
         /* ---------------- quadros de vídeo (manifest) ---------------- */
 
+        /** quadros da cena inteira */
         const quadros: Array<string[] | null> = cenas.map(() => null)
-        const quadrosPedidos = new Set<number>()
+        /** quadros de cada plano: quadrosPlano[cena][plano] */
+        const quadrosPlano: Array<Array<string[] | null>> = cenas.map((c) => c.planos.map(() => null))
+        const frenteFiel: boolean[][] = cenas.map((c) => c.planos.map(() => false))
+        const quadrosPedidos = new Set<string>()
         let manifesto: Manifesto | null = null
+        /** as fotos esperam o manifest: assim não baixam à toa as que têm clipe */
+        let manifestoLido = false
+        const temClipe = (i: number, k: number) => !!(quadros[i] || quadrosPlano[i][k])
 
         function montarQuadros() {
             if (!manifesto) return
             const ext = manifesto.formato ?? 'jpg'
             const passo = leve ? 2 : 1
-            for (const m of manifesto.cenas) {
-                const i = cenas.findIndex((c) => c.numero === Number(m.cena))
-                if (i < 0 || !m.quadros) continue
+            const lista = (m: SequenciaQuadros) => {
                 const pasta = retrato && m.mobile ? `${m.pasta}/m` : m.pasta
-                const lista: string[] = []
-                for (let q = 1; q <= m.quadros; q += passo) lista.push(`${pasta}/q-${String(q).padStart(3, '0')}.${ext}`)
-                quadros[i] = lista
+                const l: string[] = []
+                const e = m.formato ?? ext
+                for (let q = 1; q <= m.quadros; q += passo) l.push(`${pasta}/q-${String(q).padStart(3, '0')}.${e}`)
+                return l
             }
+            for (const m of manifesto.cenas ?? []) {
+                const i = cenas.findIndex((c) => c.numero === Number(m.cena))
+                if (i >= 0 && m.quadros) quadros[i] = lista(m)
+            }
+            const porClipe = new Map((manifesto.clipes ?? []).filter((m) => m.quadros).map((m) => [m.clipe, m]))
+            cenas.forEach((c, i) =>
+                c.planos.forEach((pl, k) => {
+                    const m = porClipe.get(nomeClipe(pl))
+                    quadrosPlano[i][k] = m ? lista(m) : null
+                    frenteFiel[i][k] = !!m?.frente
+                })
+            )
             quadrosPedidos.clear()
         }
 
         /** só baixa os quadros das cenas perto da atual (preload inteligente) */
         function garantirQuadros() {
+            // primeiro um quadro a cada 8 (a cena "existe" logo), depois o resto
+            const baixar = (chave: string, l: string[] | null, i: number, peso: number) => {
+                if (!l || quadrosPedidos.has(chave)) return
+                quadrosPedidos.add(chave)
+                // os quadros-chave entram na fila como fotos
+                l.forEach((src, q) => pedir(src, i, peso + (q % 8 === 0 ? 0 : 1) + q / l.length, q % 8 !== 0))
+            }
             for (let i = Math.max(0, atual - 1); i <= Math.min(cenas.length - 1, atual + 2); i++) {
-                const lista = quadros[i]
-                if (!lista || quadrosPedidos.has(i)) continue
-                quadrosPedidos.add(i)
-                // primeiro um quadro a cada 8 (a cena "existe" logo), depois o resto
-                lista.forEach((src, q) => pedir(src, i, 1 + (q % 8 === 0 ? 0 : 1) + q / lista.length))
+                baixar(`${i}`, quadros[i], i, 1)
+                quadrosPlano[i].forEach((l, k) => baixar(`${i}:${k}`, l, i, 1 + k * 0.5))
             }
         }
 
         fetch('/filme/manifest.json')
             .then((r) => (r.ok ? r.json() : null))
             .then((m: Manifesto | null) => {
-                if (!m || destruido || !Array.isArray(m.cenas)) return
-                manifesto = m
-                montarQuadros()
+                if (destruido) return
+                if (m && (Array.isArray(m.cenas) || Array.isArray(m.clipes))) {
+                    manifesto = m
+                    montarQuadros()
+                }
+                manifestoLido = true
+                pedirFotos()
                 garantirQuadros()
                 aoSujar()
             })
             .catch(() => {
                 /* sem manifesto → fotos + Ken Burns */
+                manifestoLido = true
+                pedirFotos()
             })
 
         /* ---------------- tamanho ---------------- */
@@ -258,6 +318,22 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
                 dw = largura
                 dh = largura / ir
             }
+            if (cam.enquadramento === 'conter') {
+                // Fundo suave preenche as laterais; a foto nítida preserva os rostos.
+                c.save()
+                c.globalAlpha = alfa
+                c.fillStyle = PRETO
+                c.fillRect(0, 0, largura, altura)
+                if (suportaFiltro && !leve) {
+                    c.filter = 'blur(24px)'
+                    c.globalAlpha = alfa * 0.3
+                    c.drawImage(img, (largura - dw * 1.1) / 2, (altura - dh * 1.1) / 2, dw * 1.1, dh * 1.1)
+                }
+                c.restore()
+                const escala = Math.min(largura / img.naturalWidth, altura / img.naturalHeight) * 0.92
+                dw = img.naturalWidth * escala
+                dh = img.naturalHeight * escala
+            }
             dw *= zoom
             dh *= zoom
             const ox = (px * (dw - largura)) / 2
@@ -277,6 +353,11 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
                 : { ...CAMERA_PADRAO, ...cena.camera, ...pl?.camera }
         }
 
+        /** quadros de vídeo: câmera leve, mas respeitando o enquadramento do plano */
+        function cameraVideo(cena: CenaFilme, k: number): Camera {
+            return { ...CAMERA_VIDEO, enquadramento: cameraDe(cena, k).enquadramento }
+        }
+
         /** imagem pronta para um plano (cai para a outra orientação se preciso) */
         function imagemPronta(p: { src: string; srcMobile?: string }, i: number): HTMLImageElement | null {
             const en = pedir(fonte(p), i)
@@ -285,13 +366,37 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
             return outra?.pronta ? outra.img : null
         }
 
-        function quadroPronto(i: number, u: number): HTMLImageElement | null {
-            const lista = quadros[i]
+        /**
+         * quadro da posição `u` e, se já estiver carregado, o seguinte com o peso
+         * da fração entre os dois — misturados, o movimento fica contínuo em vez de
+         * andar aos degraus (o celular usa metade dos quadros)
+         */
+        function quadrosEm(lista: string[] | null | undefined, u: number): Quadros | null {
             if (!lista) return null
             const n = lista.length
-            const idx = Math.min(n - 1, Math.floor(u * n))
-            // quadro exato ou o vizinho mais perto já carregado
-            for (let d = 0; d < 10; d++) {
+            const pos = clamp(u) * (n - 1)
+            const i0 = Math.floor(pos)
+            const t = pos - i0
+            const a = cache.get(lista[i0])
+            if (a?.pronta) {
+                const b = t > 0.02 ? cache.get(lista[Math.min(n - 1, i0 + 1)]) : undefined
+                return { a: a.img, b: b?.pronta ? b.img : null, t }
+            }
+            const perto = quadroPronto(lista, u)
+            return perto ? { a: perto, b: null, t: 0 } : null
+        }
+
+        function desenharQuadros(c: CanvasRenderingContext2D, q: Quadros, cam: Camera, u: number, alfa: number) {
+            cobrir(c, q.a, cam, u, alfa)
+            if (q.b) cobrir(c, q.b, cam, u, alfa * q.t)
+        }
+
+        function quadroPronto(lista: string[] | null | undefined, u: number): HTMLImageElement | null {
+            if (!lista) return null
+            const n = lista.length
+            const idx = Math.round(clamp(u) * (n - 1))
+            // quadro exato ou o mais perto já carregado (melhor que tela vazia)
+            for (let d = 0; d < n; d++) {
                 for (const j of d === 0 ? [idx] : [idx - d, idx + d]) {
                     if (j < 0 || j >= n) continue
                     const en = cache.get(lista[j])
@@ -319,9 +424,9 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
             if (blur > 0.4 && suportaFiltro && !leve) ctx.filter = `blur(${blur.toFixed(1)}px)`
 
             // 1. sequência de quadros (vídeo controlado pela rolagem)
-            const q = quadroPronto(i, u)
+            const q = quadrosEm(quadros[i], u)
             if (q) {
-                cobrir(ctx, q, { ...CAMERA_PADRAO, z0: 1.02, z1: 1.07 }, u, alfa)
+                desenharQuadros(ctx, q, CAMERA_VIDEO, u, alfa)
                 ctx.filter = 'none'
                 return r
             }
@@ -338,8 +443,14 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
             const iniK = k === 0 ? -ent / cena.vh : lim[k - 1]
             const uk = clamp((tl - iniK) / (lim[k] - iniK))
             const pl = cena.planos[k]
-            const img = imagemPronta(pl, i)
-            if (img) cobrir(ctx, img, cameraDe(cena, k), uk, alfa)
+            // clipe do plano (vídeo pela rolagem) ou, sem ele, a foto com Ken Burns
+            const qk = quadrosEm(quadrosPlano[i][k], uk)
+            const cam = qk ? cameraVideo(cena, k) : cameraDe(cena, k)
+            if (qk) desenharQuadros(ctx, qk, cam, uk, alfa)
+            else {
+                const img = temClipe(i, k) ? null : imagemPronta(pl, i)
+                if (img) cobrir(ctx, img, cam, uk, alfa)
+            }
 
             // transição interna entre planos
             const tipo: Transicao = cena.corteInterno ?? 'dissolve'
@@ -347,8 +458,9 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
                 const d = 0.045
                 if (tl > lim[k] - d) {
                     const m = smooth(faixa(tl, lim[k] - d, lim[k]))
-                    const prox = imagemPronta(cena.planos[k + 1], i)
-                    if (prox) cobrir(ctx, prox, cameraDe(cena, k + 1), 0, alfa * m)
+                    const qp = quadroPronto(quadrosPlano[i][k + 1], 0)
+                    const prox = qp ?? (temClipe(i, k + 1) ? null : imagemPronta(cena.planos[k + 1], i))
+                    if (prox) cobrir(ctx, prox, qp ? cameraVideo(cena, k + 1) : cameraDe(cena, k + 1), 0, alfa * m)
                     if (tipo === 'flash') r.flash += Math.sin(Math.PI * m) * 0.35
                 }
             }
@@ -359,11 +471,12 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
                 r.semente = i * 97 + k
             }
 
-            // camada de frente (pessoas por cima do texto)
-            if (pl.frente) {
+            // camada de frente (pessoas por cima do texto) — o recorte é da foto:
+            // só acompanha quadros que mantêm o primeiro plano parado
+            if (pl.frente && (!qk || frenteFiel[i][k])) {
                 const en = pedir(fonte(pl.frente), i)
                 if (en.pronta) {
-                    cobrir(fctx, en.img, cameraDe(cena, k), uk, alfa)
+                    cobrir(fctx, en.img, cam, uk, alfa)
                     frenteSuja = true
                 }
             }
@@ -445,7 +558,7 @@ export default function FilmeCanvas({ cenas, linha, apiRef, aoSujar, aoPronto, p
             }
             // fio ácido do corte editorial
             ctx.globalAlpha = 0.85 * intensidade
-            ctx.fillStyle = '#d7ff1f'
+            ctx.fillStyle = '#d8ff00'
             const yl = aleatorio(semente + 77) * H
             ctx.fillRect(aleatorio(semente + 5) * W * 0.4, yl, W * (0.2 + aleatorio(semente + 6) * 0.5), Math.max(2, 2 * dpr))
             ctx.restore()

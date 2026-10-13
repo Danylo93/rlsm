@@ -1,5 +1,150 @@
 {
   "fps": 12,
-  "formato": "jpg",
-  "cenas": []
+  "formato": "webp",
+  "cenas": [],
+  "clipes": [
+    {
+      "clipe": "celula-1",
+      "pasta": "/filme/celula-1",
+      "quadros": 60,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "celula-2",
+      "pasta": "/filme/celula-2",
+      "quadros": 60,
+      "formato": "webp",
+      "origem": "parallax"
+    },
+    {
+      "clipe": "cta",
+      "pasta": "/filme/cta",
+      "quadros": 60,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "cuidar",
+      "pasta": "/filme/cuidar",
+      "quadros": 60,
+      "formato": "webp",
+      "origem": "parallax"
+    },
+    {
+      "clipe": "discipulado",
+      "pasta": "/filme/discipulado",
+      "quadros": 60,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "enviar",
+      "pasta": "/filme/enviar",
+      "quadros": 60,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "geracao",
+      "pasta": "/filme/geracao",
+      "quadros": 60,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "hero",
+      "pasta": "/filme/hero",
+      "quadros": 60,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "mov-batismo",
+      "pasta": "/filme/mov-batismo",
+      "quadros": 30,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "mov-celulas",
+      "pasta": "/filme/mov-celulas",
+      "quadros": 30,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "mov-culto",
+      "pasta": "/filme/mov-culto",
+      "quadros": 30,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "mov-encontro",
+      "pasta": "/filme/mov-encontro",
+      "quadros": 30,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "mov-evangelismo",
+      "pasta": "/filme/mov-evangelismo",
+      "quadros": 30,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "mov-eventos",
+      "pasta": "/filme/mov-eventos",
+      "quadros": 30,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "mov-oracao",
+      "pasta": "/filme/mov-oracao",
+      "quadros": 30,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "mov-united",
+      "pasta": "/filme/mov-united",
+      "quadros": 30,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    },
+    {
+      "clipe": "presenca",
+      "pasta": "/filme/presenca",
+      "quadros": 60,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true,
+      "frente": true
+    },
+    {
+      "clipe": "treinar",
+      "pasta": "/filme/treinar",
+      "quadros": 60,
+      "formato": "webp",
+      "origem": "parallax",
+      "mobile": true
+    }
+  ]
 }

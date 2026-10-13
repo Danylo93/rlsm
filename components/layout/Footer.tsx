@@ -10,15 +10,21 @@ export default function Footer() {
     ].filter((r) => r.href)
 
     return (
-        <footer className="relative overflow-hidden bg-preto pt-24 sm:pt-32">
+        <footer className="campanha-azul relative overflow-hidden bg-preto pt-24 sm:pt-32">
             <div className="px-4 sm:px-8">
                 <p className="mono mb-6 flex items-center gap-2 text-[11px] text-osso/50">
                     <Estrela className="text-acido" /> Fim do filme. Começo da história.
                 </p>
-                <p className="display text-[clamp(56px,10.5vw,190px)] leading-[0.92]">
-                    Nós Ainda não Vivemos
+                <p className="display poster-titulo text-[clamp(56px,10.5vw,190px)] leading-[0.95]">
+                    Nós ainda não
                     <br />
+<<<<<<< HEAD
                     <span className="text-acido">Tudo</span>
+=======
+                    Vivemos
+                    <br />
+                    <span className="texto-espectro">Tudo</span>
+>>>>>>> d0f250706d1a6afce41c7c8899409d5c6f888247
                 </p>
 
                 <div className="ui-escala mt-16 grid gap-10 border-t border-osso/15 pt-10 sm:mt-24 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_0.7fr_auto] xl:gap-14">
@@ -70,13 +76,7 @@ export default function Footer() {
                 </div>
             </div>
 
-            {/* assinatura gigante */}
-            <div aria-hidden className="mt-20 select-none sm:mt-28">
-                <p className="display whitespace-nowrap text-center text-[15.2vw] leading-[0.78]">Radicais Livres</p>
-                <p className="display contorno mt-[0.1em] whitespace-nowrap text-center text-[15.2vw] leading-[0.86] opacity-60">São Miguel</p>
-            </div>
-
-            <div className="mono flex flex-col gap-3 border-t border-osso/10 px-4 py-6 text-[10px] text-osso/45 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+            <div className="mono mt-12 flex flex-col gap-3 border-t border-osso/10 px-4 py-6 text-[10px] text-osso/45 sm:flex-row sm:items-center sm:justify-between sm:px-8">
                 <p>
                     © {new Date().getFullYear()} {site.nome} · {site.igreja}
                 </p>

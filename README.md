@@ -46,15 +46,35 @@ esse contraste, remova o campo `frente` da cena em `data/cenas.ts`.
 
 ## Vídeo controlado pela rolagem
 
-Cada cena pode tocar um clipe de vídeo quadro a quadro conforme a rolagem:
+Cada plano (foto) toca um clipe quadro a quadro conforme a rolagem — rolar para baixo
+avança, para cima volta, parar congela.
 
-1. Coloque clipes em `filme/clipes/cena-01.mp4`, `cena-04.mp4`… (o número é o `numero`
-   da cena em `data/cenas.ts`: 1 abertura, 2 quem somos, 3 presença, 4 células,
-   5 discipulado, 6 movimento, 10 manifesto, 11 CTA).
-2. `npm run filme:quadros` (precisa de ffmpeg; ou `npm i -D ffmpeg-static`).
-   Opções: `FILME_FPS`, `FILME_LARGURA`, `FILME_FORMATO=webp`, `FILME_MOBILE=1`.
-3. Pronto — `public/filme/manifest.json` é lido sozinho. Cenas sem clipe continuam
-   com foto + câmera Ken Burns.
+### Filme 2.5D (o que está no ar)
+
+Cada foto vira um clipe com câmera em profundidade, **sem IA generativa**: nenhum pixel é
+inventado. A foto é separada em objetos pelas bordas do mapa de profundidade (cada pessoa ou
+grupo vira uma peça), e cada peça só é movida e escalada inteira — rosto e corpo nunca
+deformam. O movimento de cada plano foi escrito para a frase da cena (ex.: CÉLULAS recua
+quando "só aqui" é riscado; TREINAR sobe em grua em "crescer").
+
+1. `npm run filme:profundidade` — mapas de profundidade (Depth Anything V2, roda local;
+   só estima distância, não altera a foto) em `filme/profundidade/`.
+2. `npm run filme:parallax` (ou `npm run filme:parallax hero cta`) — renderiza os quadros
+   em `public/filme/<nome>/` e atualiza o manifest. A câmera de cada plano fica em
+   `MOVIMENTOS`, no topo de `scripts/filme-parallax.mjs`.
+
+Trocou uma foto? Rode os dois comandos para ela.
+
+### Vídeo filmado de verdade (tem prioridade)
+
+1. Coloque o clipe em `filme/clipes/` com o **nome da foto**: `hero.mp4`, `geracao.mp4`…
+   (`video` no plano em `data/cenas.ts` aponta para outro nome; `cena-01.mp4` cobre a cena
+   inteira.)
+2. `FILME_FORMATO=webp FILME_MOBILE=1 npm run filme:quadros` — esse plano passa a usar o
+   vídeo real; o 2.5D dele é ignorado.
+
+⚠ Não use vídeo gerado por IA a partir das fotos: testado (Higgsfield / Minimax Hailuo),
+ele muda rostos e corpos das pessoas.
 
 O site só baixa os quadros das cenas próximas da posição atual (primeiro 1 a cada 8,
 depois o resto) e, no celular, usa metade dos quadros.

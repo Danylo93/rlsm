@@ -67,13 +67,13 @@ export default function MobileMenu({ aberto, aoFechar }: { aberto: boolean; aoFe
             // fechado desde o SSR: invisível e inerte
             inert
             style={{ visibility: 'hidden', clipPath: 'inset(0 0 100% 0)' }}
-            className="fixed inset-0 z-[55] flex flex-col bg-preto"
+            className="campanha-clara fixed inset-0 z-[55] flex flex-col bg-preto"
             onClick={(e) => {
                 if ((e.target as HTMLElement).closest('a')) aoFechar()
             }}
         >
             <div className="flex h-[var(--cabecalho)] shrink-0 items-center justify-between px-4 sm:px-8">
-                <Logo />
+                <Logo className="campanha-logo" />
                 <button
                     ref={fecharRef}
                     type="button"

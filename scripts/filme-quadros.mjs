@@ -6,20 +6,22 @@
  * conforme a rolagem: rolar para baixo = vídeo para frente; para cima = para trás.
  *
  * Uso:
- *   1. Coloque os clipes em  filme/clipes/cena-01.mp4, cena-03.mp4 ...
- *      O número é o `numero` da cena em data/cenas.ts (1 = abertura,
- *      2 = quem somos, 3 = presença, 4 = células, 5 = discipulado,
- *      6 = movimento, 10 = manifesto, 11 = CTA). Aceita .mp4, .webm e .mov.
- *      Não precisa ter clipe para todas: cenas sem clipe usam as fotos.
+ *   1. Coloque os clipes em filme/clipes/. Dois jeitos (aceita .mp4, .webm e .mov):
+ *      - por plano: <nome da foto>.mp4 (hero.mp4, mov-culto.mp4...) substitui
+ *        aquela foto onde ela aparecer. Para reaproveitar um clipe com outro
+ *        nome, use o campo `video` do plano em data/cenas.ts.
+ *      - por cena: cena-01.mp4, cena-03.mp4... (número = `numero` da cena em
+ *        data/cenas.ts) toca na cena inteira, por cima de todos os planos.
+ *      Não precisa ter clipe para tudo: planos sem clipe usam as fotos.
  *   2. Rode:  npm run filme:quadros
- *   3. Saída: public/filme/cena-01/q-001.jpg ... + public/filme/manifest.json
+ *   3. Saída: public/filme/<nome>/q-001.jpg ... + public/filme/manifest.json
  *      A página detecta o manifesto sozinha — nenhum código muda.
  *
  * ffmpeg: usa FFMPEG_PATH, o pacote ffmpeg-static (se instalado) ou o do sistema.
  *
  * Opções (variáveis de ambiente):
  *   FILME_FPS=12        quadros por segundo extraídos (padrão 12)
- *   FILME_LARGURA=1600  largura dos quadros desktop (padrão 1600)
+ *   FILME_LARGURA=1600  largura máxima dos quadros desktop (padrão 1600; não amplia)
  *   FILME_QUALIDADE=4   qualidade JPEG 2 (melhor) .. 7 (padrão 4)
  *   FILME_FORMATO=jpg   jpg | webp
  *   FILME_MOBILE=1      também gera quadros retrato (recorte central 2:3,
@@ -31,7 +33,7 @@
  */
 
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
@@ -72,40 +74,52 @@ try {
 
 if (!existsSync(dirClipes)) {
     mkdirSync(dirClipes, { recursive: true })
-    console.log(`Pasta criada: ${dirClipes}\nColoque cena-01.mp4, cena-03.mp4... nela e rode de novo.`)
+    console.log(`Pasta criada: ${dirClipes}\nColoque hero.mp4, cena-01.mp4... nela e rode de novo.`)
     process.exit(0)
 }
 
 const clipes = readdirSync(dirClipes)
-    .filter((f) => /^cena-\d+\.(mp4|webm|mov)$/i.test(f))
-    .sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]))
+    .filter((f) => /^[\w-]+\.(mp4|webm|mov)$/i.test(f))
+    .sort()
 
 if (clipes.length === 0) {
-    console.log(`Nenhum clipe em ${dirClipes} (esperado: cena-01.mp4, cena-02.mp4, ...).`)
+    console.log(`Nenhum clipe em ${dirClipes} (esperado: hero.mp4, cena-01.mp4, ...).`)
     process.exit(0)
 }
 
-const qualidade = FORMATO === 'webp' ? ['-quality', String(90 - QUALIDADE * 6)] : ['-q:v', String(QUALIDADE)]
+// libwebp explícito: o padrão (libwebp_anim) junta tudo num .webp animado
+const qualidade =
+    FORMATO === 'webp' ? ['-c:v', 'libwebp', '-quality', String(90 - QUALIDADE * 6)] : ['-q:v', String(QUALIDADE)]
 
 function extrair(origem, destino, filtro) {
     execFileSync(
         ffmpeg,
-        ['-loglevel', 'error', '-i', origem, '-vf', filtro, ...qualidade, '-an', join(destino, `q-%03d.${FORMATO}`)],
+        ['-loglevel', 'error', '-i', origem, '-vf', filtro, ...qualidade, '-an', '-f', 'image2', join(destino, `q-%03d.${FORMATO}`)],
         { stdio: 'pipe' }
     )
 }
 
-const manifesto = { fps: FPS, formato: FORMATO, cenas: [] }
+// mantém os clipes 2.5D (filme-parallax.mjs) que não têm vídeo real com o mesmo nome
+const arqManifesto = join(dirSaida, 'manifest.json')
+const anterior = existsSync(arqManifesto) ? JSON.parse(readFileSync(arqManifesto, 'utf8')) : {}
+const reais = clipes.map((c) => c.replace(/\.\w+$/, ''))
+const manifesto = {
+    fps: FPS,
+    formato: FORMATO,
+    cenas: [],
+    clipes: (anterior.clipes ?? []).filter((c) => c.origem === 'parallax' && !reais.includes(c.clipe)),
+}
 
 for (const clipe of clipes) {
-    const numero = Number(clipe.match(/\d+/)[0])
-    const pasta = `cena-${String(numero).padStart(2, '0')}`
+    const nome = clipe.replace(/\.\w+$/, '')
+    const daCena = nome.match(/^cena-(\d+)$/)
+    const pasta = daCena ? `cena-${daCena[1].padStart(2, '0')}` : nome
     const destino = join(dirSaida, pasta)
     rmSync(destino, { recursive: true, force: true })
     mkdirSync(destino, { recursive: true })
 
     console.log(`→ ${clipe}  (${FPS} fps, ${LARGURA}px, ${FORMATO})`)
-    extrair(join(dirClipes, clipe), destino, `fps=${FPS},scale=${LARGURA}:-2:flags=lanczos`)
+    extrair(join(dirClipes, clipe), destino, `fps=${FPS},scale='min(iw,${LARGURA})':-2:flags=lanczos`)
 
     if (MOBILE) {
         mkdirSync(join(destino, 'm'), { recursive: true })
@@ -113,9 +127,11 @@ for (const clipe of clipes) {
     }
 
     const quadros = readdirSync(destino).filter((f) => f.startsWith('q-')).length
-    manifesto.cenas.push({ cena: numero, pasta: `/filme/${pasta}`, quadros, ...(MOBILE ? { mobile: true } : {}) })
+    const seq = { pasta: `/filme/${pasta}`, quadros, ...(MOBILE ? { mobile: true } : {}) }
+    if (daCena) manifesto.cenas.push({ cena: Number(daCena[1]), ...seq })
+    else manifesto.clipes.push({ clipe: nome, ...seq })
     console.log(`  ✓ ${quadros} quadros em public/filme/${pasta}/${MOBILE ? ' (+ retrato em m/)' : ''}`)
 }
 
-writeFileSync(join(dirSaida, 'manifest.json'), JSON.stringify(manifesto, null, 2))
+writeFileSync(arqManifesto, JSON.stringify(manifesto, null, 2))
 console.log('\n✓ public/filme/manifest.json — o site passa a usar os quadros automaticamente.')

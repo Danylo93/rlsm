@@ -6,8 +6,9 @@
  * componentes de components/sections.
  *
  * Trocar fotos: substitua em fotos-originais/ e rode `npm run fotos`.
- * Vídeo de verdade: coloque clipes em filme/clipes/cena-01.mp4 (número = `numero`)
- * e rode `npm run filme:quadros` — a cena passa a tocar o vídeo pela rolagem.
+ * Movimento: cada foto vira um clipe 2.5D (scripts/filme-parallax.mjs — a câmera
+ * de cada plano está escrita lá, junto com a frase da cena). Vídeo filmado de
+ * verdade em filme/clipes/<nome da foto>.mp4 + `npm run filme:quadros` substitui.
  */
 
 import type { CenaFilme } from '@/components/cinematic/motor'
@@ -24,8 +25,8 @@ export const filmeAbertura: CenaFilme[] = [
         vh: 150,
         planos: [{ ...foto('hero'), alt: 'Jovens com as mãos levantadas em adoração' }],
         // a câmera avança para dentro da multidão
-        camera: { z0: 1.06, z1: 1.32, py0: 0, py1: -0.35 },
-        cameraMobile: { z0: 1.04, z1: 1.26, px0: 0, px1: 0.1 },
+        camera: { z0: 1.06, z1: 1.08, py0: 0, py1: -0.35 },
+        cameraMobile: { z0: 1.04, z1: 1.08, px0: 0, px1: 0.1 },
         luz: { feixe: { x: 0.64, angulo: -0.32, alfa: 0.12 }, quente: 0.35, vazamento: 0.22, exposicao: [0, -0.3] },
         escurecer: 0.25,
         ancora: 'inicio',
@@ -36,9 +37,9 @@ export const filmeAbertura: CenaFilme[] = [
         capitulo: 'Quem somos',
         vh: 170,
         entrada: { tipo: 'dissolve', vh: 45 },
-        planos: [{ ...foto('geracao'), alt: 'Silhuetas de jovens adorando sob luz quente' }],
+        planos: [{ ...foto('geracao'), alt: 'Família RL São Miguel reunida após o culto' }],
         // pan horizontal lento
-        camera: { z0: 1.16, z1: 1.08, px0: -0.7, px1: 0.6 },
+        camera: { z0: 1.08, z1: 1.08, px0: -0.7, px1: 0.6 },
         cameraMobile: { z0: 1.06, z1: 1.04, px0: -0.6, px1: 0.6 },
         luz: { feixe: { x: 0.24, angulo: 0.28, alfa: 0.1 }, quente: 0.45, vazamento: 0.2 },
         escurecer: 0.35,
@@ -59,8 +60,8 @@ export const filmeAbertura: CenaFilme[] = [
             },
         ],
         // zoom lento de câmera
-        camera: { z0: 1.03, z1: 1.2, py0: 0.15, py1: -0.1 },
-        cameraMobile: { z0: 1.02, z1: 1.16, py0: 0.1, py1: -0.05 },
+        camera: { z0: 1.03, z1: 1.08, py0: 0.15, py1: -0.1 },
+        cameraMobile: { z0: 1.02, z1: 1.08, py0: 0.1, py1: -0.05 },
         luz: { feixe: { x: 0.5, angulo: 0, alfa: 0.15, deriva: 0.02 }, quente: 0.5, vazamento: 0.45, exposicao: [-0.15, 0.12] },
         escurecer: 0.12,
         letterbox: 1,
@@ -76,13 +77,14 @@ export const filmeAbertura: CenaFilme[] = [
             {
                 ...foto('celula-1'),
                 ate: 0.48,
-                camera: { z0: 1.18, z1: 1.05, px0: 0.35, px1: -0.2 },
-                alt: 'Jovens reunidos em volta da mesa numa casa',
+                camera: { enquadramento: 'conter', z0: 1, z1: 1, px0: 0, px1: 0 },
+                alt: 'Jovens e líderes juntos na igreja',
             },
             {
                 ...foto('celula-2'),
-                camera: { z0: 1.04, z1: 1.18, px0: -0.3, px1: 0.25 },
-                alt: 'Amigos conversando e rindo à mesa',
+                srcMobile: '/img/cenas/celula-2.webp',
+                camera: { enquadramento: 'conter', z0: 1, z1: 1, px0: 0, px1: 0 },
+                alt: 'Três amigos reunidos em uma casa',
             },
         ],
         luz: { quente: 0.45, vazamento: 0.15 },
@@ -98,10 +100,10 @@ export const filmeAbertura: CenaFilme[] = [
         entrada: { tipo: 'dissolve', vh: 40 },
         corteInterno: 'dissolve',
         planos: [
-            { ...foto('discipulado'), ate: 0.33, alt: 'Dois jovens orando juntos, testa com testa' },
-            { ...foto('cuidar'), ate: 0.54, camera: { z0: 1.12, z1: 1.02, py0: -0.2, py1: 0.1 }, alt: 'Amigas orando umas pelas outras' },
-            { ...foto('treinar'), ate: 0.74, camera: { z0: 1.03, z1: 1.14, px0: 0.4, px1: 0.1 }, alt: 'Conversa de discipulado à mesa' },
-            { ...foto('enviar'), camera: { z0: 1.16, z1: 1.04, px0: -0.3, px1: 0.3 }, alt: 'Jovens juntos ao ar livre' },
+            { ...foto('discipulado'), ate: 0.33, alt: 'Jovens e líderes reunidos em um encontro' },
+            { ...foto('cuidar'), srcMobile: '/img/cenas/cuidar.webp', ate: 0.54, camera: { enquadramento: 'conter', z0: 1, z1: 1, py0: 0, py1: 0 }, alt: 'Três amigos juntos, com os braços nos ombros' },
+            { ...foto('treinar'), ate: 0.74, camera: { enquadramento: 'conter', z0: 1, z1: 1, px0: 0, px1: 0 }, alt: 'Líder ensinando com o microfone' },
+            { ...foto('enviar'), camera: { z0: 1.08, z1: 1.04, px0: -0.3, px1: 0.3 }, alt: 'Grupo do RL São Miguel reunido em um evento' },
         ],
         luz: { feixe: { x: 0.72, angulo: -0.22, alfa: 0.08 }, quente: 0.35, vazamento: 0.12 },
         escurecer: 0.45,
@@ -110,21 +112,21 @@ export const filmeAbertura: CenaFilme[] = [
     {
         id: 'movimento',
         numero: 6,
-        capitulo: 'Movimento',
+        capitulo: 'Legado',
         vh: 300,
         entrada: { tipo: 'flash', vh: 24 },
         corteInterno: 'corte',
         glitch: true,
         // montagem rápida: um plano por momento da vida do RL
         planos: [
-            { ...foto('mov-culto'), rotulo: 'Culto RL', camera: { z0: 1.22, z1: 1.04, px0: -0.3, px1: 0.3 } },
-            { ...foto('mov-united'), rotulo: 'United Day', camera: { z0: 1.04, z1: 1.2, px0: 0.3, px1: -0.2 } },
-            { ...foto('mov-encontro'), rotulo: 'Encontro com Deus', camera: { z0: 1.2, z1: 1.06, py0: 0.3, py1: -0.2 } },
-            { ...foto('mov-celulas'), rotulo: 'Células', camera: { z0: 1.05, z1: 1.2, px0: -0.4, px1: 0.2 } },
-            { ...foto('mov-batismo'), rotulo: 'Batismo', camera: { z0: 1.22, z1: 1.05, px0: 0.2, px1: -0.2 } },
-            { ...foto('mov-evangelismo'), rotulo: 'Evangelismo', camera: { z0: 1.05, z1: 1.18, px0: 0.4, px1: -0.1 } },
-            { ...foto('mov-oracao'), rotulo: 'Oração', camera: { z0: 1.2, z1: 1.04 } },
-            { ...foto('mov-eventos'), rotulo: 'Eventos', camera: { z0: 1.04, z1: 1.24, py0: -0.2, py1: 0.2 } },
+            { ...foto('mov-culto'), rotulo: 'Culto RL', camera: { z0: 1.08, z1: 1.04, px0: -0.3, px1: 0.3 } },
+            { ...foto('mov-united'), rotulo: 'United Day', camera: { z0: 1.04, z1: 1.08, px0: 0.3, px1: -0.2 } },
+            { ...foto('mov-encontro'), rotulo: 'Encontro com Deus', camera: { z0: 1.08, z1: 1.06, py0: 0.3, py1: -0.2 } },
+            { ...foto('mov-celulas'), rotulo: 'Células', camera: { z0: 1.05, z1: 1.08, px0: -0.4, px1: 0.2 } },
+            { ...foto('mov-batismo'), rotulo: 'Batismo', camera: { z0: 1.08, z1: 1.05, px0: 0.2, px1: -0.2 } },
+            { ...foto('mov-evangelismo'), rotulo: 'Evangelismo', camera: { z0: 1.05, z1: 1.08, px0: 0.4, px1: -0.1 } },
+            { ...foto('mov-oracao'), rotulo: 'Oração', camera: { z0: 1.08, z1: 1.04 } },
+            { ...foto('mov-eventos'), rotulo: 'Eventos', camera: { z0: 1.04, z1: 1.08, py0: -0.2, py1: 0.2 } },
         ],
         luz: { quente: 0.3, vazamento: 0.3 },
         escurecer: 0.32,
@@ -149,10 +151,10 @@ export const filmeFinal: CenaFilme[] = [
         capitulo: 'Fazer parte',
         vh: 190,
         entrada: { tipo: 'preto', vh: 70 },
-        planos: [{ ...foto('cta'), alt: 'Multidão de jovens com as mãos levantadas sob luz dourada' }],
-        // a câmera recua e revela a multidão
-        camera: { z0: 1.3, z1: 1.04, py0: 0.25, py1: 0 },
-        cameraMobile: { z0: 1.2, z1: 1.02 },
+        planos: [{ ...foto('cta'), alt: 'Família Radicais Livres São Miguel reunida no Holy Fest' }],
+        // Preenche o slide sem faixas laterais e sem zoom animado.
+        camera: { enquadramento: 'cobrir', z0: 1, z1: 1, py0: 0, py1: 0 },
+        cameraMobile: { enquadramento: 'cobrir', z0: 1, z1: 1 },
         luz: { feixe: { x: 0.45, angulo: 0.15, alfa: 0.12 }, quente: 0.55, vazamento: 0.35, exposicao: [-0.25, 0] },
         escurecer: 0.42,
         ancora: 'fazer-parte',
@@ -174,8 +176,8 @@ export interface Numero {
 
 /* Troque pelos números reais quando quiser (ex.: valor: 32, rotulo: 'CÉLULAS'). */
 export const numeros: Numero[] = [
-    { valor: 1, digitos: 2, rotulo: 'Geração', texto: 'Jovens de São Miguel vivendo a mesma fé, do mesmo lado.' },
+    { valor: 1, digitos: 2, rotulo: 'Geração', texto: 'Radicais Livres São Miguel vivendo o ano da  multiplicação.' },
     { valor: 'Várias', rotulo: 'Células', texto: 'Casas abertas pela cidade, toda semana. Sempre cabe mais um.' },
-    { valor: 'Um', rotulo: 'Propósito', texto: 'Viver Jesus de verdade e levar Jesus pra onde a gente for.' },
-    { valor: 'Jesus.', rotulo: 'O centro de tudo', texto: 'Não é sobre um evento. É sobre Ele.', destaque: true },
+    { valor: 'Um', rotulo: 'Legado', texto: 'Viver Jesus de verdade e levar Jesus pra onde a gente for.' },
+    { valor: 'Jesus.', rotulo: 'O centro de tudo', texto: 'Destinados a um avivamento', destaque: true },
 ]

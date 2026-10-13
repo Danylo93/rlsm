@@ -25,7 +25,7 @@ interface Props {
 }
 
 const corpo: Record<Variante, string> = {
-    acido: 'bg-acido text-preto',
+    acido: 'botao-principal text-preto',
     claro: 'bg-osso text-preto',
     contorno: 'bg-preto/30 text-osso ring-1 ring-inset ring-osso/60 backdrop-blur-sm',
 }
@@ -102,7 +102,7 @@ export default function Botao({
             {...(ehExterno ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
             data-cursor={cursor}
             style={style}
-            className={`ui-escala group wide inline-flex select-none items-stretch text-[12px] leading-none tracking-[0.06em] sm:text-[13px] ${className}`}
+            className={`botao-etiqueta ui-escala group wide inline-flex select-none items-stretch text-[12px] leading-none tracking-[0.06em] sm:text-[13px] ${className}`}
         >
             <span className={`flex items-center whitespace-nowrap px-5 sm:px-6 ${altura} ${corpo[variante]}`}>
                 <span className="rolar">
